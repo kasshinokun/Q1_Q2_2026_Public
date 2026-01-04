@@ -1,4 +1,6 @@
 # Tutorial FreeBSD (PT-BR)
+# Importante= login : root
+# or another user with root permissions its necessary
 
 # Atualizar repositórios e sistema
 pkg update
