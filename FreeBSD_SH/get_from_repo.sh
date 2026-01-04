@@ -51,5 +51,11 @@ sysrc seatd_enable="YES"
 # Habilitar sddm
 sysrc sddm_enable="YES"
 
+mkdir -p /usr/local/etc/pkg/repos
+echo 'FreeBSD: { url: "pkg+https://pkg.FreeBSD.org/${ABI}/latest" }' > /usr/local/etc/pkg/repos/FreeBSD.conf
+echo 'FreeBSD-kmods: { url: "pkg+https://pkg.FreeBSD.org/${ABI}/KMODSFLAVOR", mirror_type: "srv",signature_type: "fingerprints", fingerprints: "/usr/share/keys/pkg", enabled: yes}' > /usr/local/etc/pkg/repos/kmods.conf
+
+pkg update -f
+
 # Reiniciar para aplicar todas as configurações
 echo "Reinicie o sistema com: reboot"
