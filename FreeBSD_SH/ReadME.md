@@ -1,5 +1,10 @@
 # Codigo SH para chamar via Terminal Linux
 
+
+## Licença
+
+[MIT License] (https://github.com/kasshinokun/Q1_Q2_2026_Public/blob/main/LICENSE)
+
 Objetivo: facilitar pos-instalação de FreeBSD
 
 Specs:
@@ -12,3 +17,5 @@ Specs:
 
 Créditos para otimização do código .sh e dica de tutorial: 
 <br>[Kunusoft - FreeBSD 15: Installing KDE Plasma on Wayland | Performance & Benchmarks](https://www.youtube.com/watch?v=xc9B-_ZG0ig)
+
+
