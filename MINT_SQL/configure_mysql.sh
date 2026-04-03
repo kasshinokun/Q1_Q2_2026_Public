@@ -7,7 +7,7 @@
 # Script Name: configure_mysql.sh
 # Description: Installs and configures MySQL Server and Workbench on Ubuntu/Mint.
 # Author: Gabriel da Silva Cassino
-# Date: 2026-04-03
+# Date: 2026-04-03 release 20260403 alpha 1c
 # =============================================================================
 
 # Colors for output
@@ -88,7 +88,12 @@ install_mysql() {
 
     echo "Installing MySQL Workbench via Snap..."
     install_snap
-    snap install mysql-workbench-community --classic
+    
+    # Use with the version suffixed "--classic" if necessary.
+    # snap install mysql-workbench-community --classic
+
+    # by default is without "--classic" suffix
+    snap install mysql-workbench-community
 
     success "MySQL and Workbench installation complete."
 }
