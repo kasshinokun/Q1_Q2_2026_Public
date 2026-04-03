@@ -14,7 +14,7 @@ Gabriel da Silva Cassino
 ## Date Creation: 
 2026-04-03 
 ## Release Version:
-version 20260403 release alpha 1b
+version 20260403 release alpha 1c
 
 ### Reason: 
 Due to the need to use a temporary live OS 
