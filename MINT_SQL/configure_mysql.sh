@@ -55,12 +55,35 @@ install_snap() {
     echo "Updating package lists..."
     apt update -y
 
+    # By default OS has GCC, G++ and Python
+    # but Java its necessary to install
+    # Without Java isnt possible run Snap
+    
+    echo "Checking GCC..."
+    gcc --version
+    echo "Checking G++..."
+    g++ --version
+    echo "Checking Python..."
+    python3 --version
+    echo "Checking Java..."
+    java --version 
+    echo "Installing Java..."
+    apt install openjdk-25-jre-headless default-jre
+    echo "Redo checking Java..."
+    java --version 
+    
     echo "Installing Snapd..."
     apt install -y snapd
 
     if command -v snap >/dev/null 2>&1; then
         snap --version
         success "Snap installed successfully."
+
+        # Fix Desktop Path for ZSH/Wayland
+        ln -s /var/lib/snapd/desktop/applications/*.desktop ~/.local/share/applications/
+        
+        # if necessary,add Path to Environment
+        # export PATH=$PATH:/snap/bin
     else
         error "Failed to install Snap."
         exit 1
@@ -86,6 +109,11 @@ install_mysql() {
     echo "after this script finishes to secure your MySQL instance."
     echo "------------------------------------------------------------"
 
+    # install_mysql_workbench_snap
+
+    install_mysql_workbench_deb
+}    
+install_mysql_workbench_snap() {
     echo "Installing MySQL Workbench via Snap..."
     install_snap
     
@@ -96,7 +124,37 @@ install_mysql() {
     snap install mysql-workbench-community
 
     success "MySQL and Workbench installation complete."
-}
+
+    snap connect mysql-workbench-community:password-manager-service
+    snap connect mysql-workbench-community:ssh-keys
+    snap connect mysql-workbench-community:cups-control
+
+    apt install dbus-x11
+    
+    xhost +local:root
+
+    apt update 
+
+    snap run mysql-workbench-community    
+}    
+install_mysql_workbench_deb() {
+    
+    snap remove mysql-workbench-community
+    
+    apt-get install libodbc2 libproj25
+    
+    VERSION_APP="8.0.46"
+    ARCHITECTURE="ubuntu24.04_amd64"
+    FILE_DEB="mysql-workbench-community_${VERSION_APP}-1${ARCHITECTURE}.deb"
+    URL="https://dev.mysql.com/get/Downloads/MySQLGUITools/${FILE_DEB}"
+    
+    wget "$URL"
+
+    apt update
+    
+    apt install ./"$FILE_DEB"
+
+}    
 
 # Check for root privileges
 if [[ $EUID -ne 0 ]]; then
