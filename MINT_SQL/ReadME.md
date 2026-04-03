@@ -25,6 +25,17 @@ and not having time to configure it every time,
 
 I created this to facilitate my work wherever I am.
 
+### Hardware Specs and Output
+Intel Core i5-4200U
+
+Acer Aspire  E1-572-6830
+
+Linux Mint 22.3
+
+- Release 20260403 alpha 1b<br>
+[Output on Terminal of Linux after running script](https://github.com/kasshinokun/Q1_Q2_2026_Public/blob/main/MINT_SQL/output_on_terminal.txt)
+
+
 
 
 
