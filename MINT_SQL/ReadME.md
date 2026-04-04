@@ -14,7 +14,9 @@ Gabriel da Silva Cassino
 ## Date Creation: 
 2026-04-03 
 ## Release Version:
-version 20260403 release alpha 1d 
+version 20260403 release alpha 1e 
+
+- add stack-structured functions like as normal program
 - added setting MySQL Workbench by .deb package
 - Some additional packages and necessaries details to manage on Live OS
 - **Note Important:** using .deb package is more stable to running on Live OS
@@ -39,7 +41,7 @@ Linux Mint 22.3
 [Output on Terminal of Linux after running script](https://github.com/kasshinokun/Q1_Q2_2026_Public/blob/main/MINT_SQL/output_on_terminal.txt)
 
 - Setting password root<br>
-[Script to set MySQL after mysql_secure_installation](https://github.com/kasshinokun/Q1_Q2_2026_Public/blob/main/MINT_SQL/setter_mysql.sh)
+[Script to set MySQL with optional mysql_secure_installation](https://github.com/kasshinokun/Q1_Q2_2026_Public/blob/main/MINT_SQL/setter_mysql.sh)
 
 
 
