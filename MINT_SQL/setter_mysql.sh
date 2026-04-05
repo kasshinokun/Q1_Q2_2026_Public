@@ -10,7 +10,7 @@
 # Description: Installs or Updates, and configures MySQL Server
 #              and MySQL Root User on any Linux.
 # Author: Gabriel da Silva Cassino
-# Date: 2026-04-03 release 20260403 alpha 1d
+# Date: 2026-04-03 release 20260405 alpha 1a
 # =============================================================================
 
 setting_user(){
@@ -41,9 +41,23 @@ setting_user(){
     # Escapes single quotes in the password for SQL usage (basic)
     local escaped_pass="${MYSQL_ROOT_PASSWORD//\'/\\\'}"
 
-    echo "Updating repositories and installing MySQL..."
+    # Disable CD-ROM repository if exists
+    if grep -q "^deb cdrom:" /etc/apt/sources.list 2>/dev/null; then
+        echo "Disable CD-ROM repository..."
+        sudo sed -i '/^deb cdrom:/s/^/#/' /etc/apt/sources.list
+    fi
+
+
+    echo "Updating repositories..."
     sudo apt-get update || { echo "Update failed"; return 1; }
-    sudo apt-get install mysql-server -y || { echo "Installation failed"; return 1; }
+    echo "Installing MySQL..."
+    apt_output=$(sudo apt install mysql-server -y 2>&1)
+    if [ $? -eq 0 ] || echo "$apt_output" | grep -q "mysql-server is already the newest version"; then
+        echo "MySQL ready"
+    else
+        echo "Installation failed"
+        return 1
+    fi
 
     # Ensures the service is running
     sudo systemctl start mysql
