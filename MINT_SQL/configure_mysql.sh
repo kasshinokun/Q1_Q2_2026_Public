@@ -7,7 +7,7 @@
 # Script Name: configure_mysql.sh
 # Description: Installs and configures MySQL Server and Workbench on Ubuntu/Mint.
 # Author: Gabriel da Silva Cassino
-# Date: 2026-04-03 release 20260403 alpha 1e
+# Date: 2026-04-03 release 20260403 alpha 1f
 # =============================================================================
 
 # Stack-structured script like a normal program.
@@ -27,7 +27,29 @@ error() {
 success() {
     echo -e "${GREEN}[OK] $1${NC}"
 }
+run_lang_to_coding_on_system () {
+    
+    echo "Updating package lists..."
+    apt update -y
 
+    # By default OS has GCC, G++ and Python
+    # but Java its necessary to install
+    # Without Java isnt possible run Snap
+    
+    echo "Checking GCC..."
+    gcc --version
+    echo "Checking G++..."
+    g++ --version
+    echo "Checking Python..."
+    python3 --version
+    echo "Checking Java..."
+    java --version 
+    echo "Installing Java..."
+    apt install -y openjdk-25-jre-headless default-jre
+    echo "Redo checking Java..."
+    java --version
+
+}
 # Function to install Snap
 install_snap() {
     echo "Verifying operating system..."
@@ -54,26 +76,12 @@ install_snap() {
             mv /etc/apt/preferences.d/nosnap.pref /etc/apt/preferences.d/nosnap.bak
         fi
     fi
-
-    echo "Updating package lists..."
-    apt update -y
-
-    # By default OS has GCC, G++ and Python
-    # but Java its necessary to install
-    # Without Java isnt possible run Snap
     
-    echo "Checking GCC..."
-    gcc --version
-    echo "Checking G++..."
-    g++ --version
-    echo "Checking Python..."
-    python3 --version
-    echo "Checking Java..."
-    java --version 
-    echo "Installing Java..."
-    apt install openjdk-25-jre-headless default-jre
-    echo "Redo checking Java..."
-    java --version 
+    # Modular Function to
+    # Add programming languages support 
+    # (C,C++ and Python Check, and Java Installation)  
+    echo "Organizing preparations...."
+    run_lang_to_coding_on_system
     
     echo "Installing Snapd..."
     apt install -y snapd
@@ -108,7 +116,7 @@ install_mysql_workbench_snap() {
     snap connect mysql-workbench-community:ssh-keys
     snap connect mysql-workbench-community:cups-control
 
-    apt install dbus-x11
+    apt install -y dbus-x11
     
     xhost +local:root
 
@@ -118,9 +126,9 @@ install_mysql_workbench_snap() {
 }    
 install_mysql_workbench_deb() {
     
-    snap remove mysql-workbench-community
+    snap remove mysql-workbench-community 2>/dev/null
     
-    apt-get install libodbc2 libproj25
+    apt-get install -y libodbc2 libproj25 wget curl
     
     VERSION_APP="8.0.46"
     ARCHITECTURE="ubuntu24.04_amd64"
@@ -128,10 +136,14 @@ install_mysql_workbench_deb() {
     URL="https://dev.mysql.com/get/Downloads/MySQLGUITools/${FILE_DEB}"
     
     wget "$URL"
-
-    apt update
     
-    apt install ./"$FILE_DEB"
+    # Install with dependency resolution
+    apt update
+    apt install -y -f ./"$FILE_DEB" || {
+        error "Failed to install DEB package. Attempting to fix dependencies..."
+        apt --fix-broken install -y
+        apt install -y -f ./"$FILE_DEB"
+    }
 
 }    
 
@@ -154,9 +166,107 @@ install_mysql() {
     echo "after this script finishes to secure your MySQL instance."
     echo "------------------------------------------------------------"
 
-    # install_mysql_workbench_snap
+    echo "Defining Installation Type ..."
+    echo "Is your MySQL Workbench Installation:"
+    echo "A) by Snap Package"
+    echo "B/Any key) by .deb Package"
+    echo -n "Please choice [A/B/Any key] "
+    read -r type_workbench
 
-    install_mysql_workbench_deb
+    # Standardize input to uppercase
+    type_workbench=${type_workbench^^}
+
+    if [[ "$type_workbench" == "A" ]]; then
+        install_mysql_workbench_snap ''
+    else
+        install_mysql_workbench_deb
+    fi
+        
+
+
+
+
+}
+setter_key_us_auto(){
+    echo "Automatic - Applying US Layout ..."
+    echo -n "Is your keyboard A) 104-keys or B/Any key) 105-keys? [A/B/Any key]: "
+    read -r type_keyboard
+
+    # Standardize input to uppercase
+    type_keyboard=${type_keyboard^^}
+
+    if [[ "$type_keyboard" == "A" ]]; then
+        setxkbmap -model pc104 -layout us -variant ''
+    else
+        setxkbmap -model pc105 -layout us -variant intl
+    fi
+    setxkbmap -query
+
+    success "Keyboard layout updated to US."
+
+}
+setter_key_us_manual(){
+
+    echo "Manual - Applying US Layout..."
+    echo -n "Is your keyboard A) 104-keys or B) 105-keys? [A/B]: "
+    read -r type_keyboard
+    
+    # Standardize input to uppercase
+    type_keyboard=${type_keyboard^^}
+
+    if [[ "$type_keyboard" == "A" ]]; then
+        sed -i 's/XKBMODEL=".*"/XKBMODEL="pc104"/' /etc/default/keyboard
+        sed -i 's/XKBVARIANT=".*"/XKBVARIANT=""/' /etc/default/keyboard
+    else
+        sed -i 's/XKBMODEL=".*"/XKBMODEL="pc105"/' /etc/default/keyboard
+        sed -i 's/XKBVARIANT=".*"/XKBVARIANT="intl"/' /etc/default/keyboard
+    fi
+
+    sed -i 's/XKBLAYOUT=".*"/XKBLAYOUT="us"/' /etc/default/keyboard
+    sed -i 's/XKBOPTIONS=".*"/XKBOPTIONS=""/' /etc/default/keyboard
+    sed -i 's/BACKSPACE=".*"/BACKSPACE="guess"/' /etc/default/keyboard
+
+    # Only run setupcon if we're in a virtual console
+    if [ -z "$DISPLAY" ] && [ "$(tty)" != "/dev/tty"* ]; then
+        setupcon
+    else
+        echo "Note: Keyboard changes will apply after reboot or session restart"
+    fi
+
+    udevadm trigger --subsystem-match=input --action=change
+
+    localectl status
+
+    success "Keyboard layout updated to US."
+
+}
+setter_key_br_auto(){
+    echo "Manual - Applying ABNT2 Layout..."
+    setxkbmap -model abnt2 -layout br -variant abnt2
+    setxkbmap -query
+    success "Keyboard layout updated to ABNT2."
+}
+setter_key_br_manual(){
+    echo "Manual - Applying ABNT2 Layout..."
+    sed -i 's/XKBMODEL=".*"/XKBMODEL="abnt2"/' /etc/default/keyboard
+    sed -i 's/XKBLAYOUT=".*"/XKBLAYOUT="br"/' /etc/default/keyboard
+    sed -i 's/XKBVARIANT=".*"/XKBVARIANT="abnt2"/' /etc/default/keyboard
+    sed -i 's/XKBOPTIONS=".*"/XKBOPTIONS="lv3:alt_switch,compose:rctrl"/' /etc/default/keyboard
+    sed -i 's/BACKSPACE=".*"/BACKSPACE="guess"/' /etc/default/keyboard
+
+    # Only run setupcon if we're in a virtual console
+    if [ -z "$DISPLAY" ] && [ "$(tty)" != "/dev/tty"* ]; then
+        setupcon
+    else
+        echo "Note: Keyboard changes will apply after reboot or session restart"
+    fi
+
+    udevadm trigger --subsystem-match=input --action=change
+
+    localectl status
+
+    success "Keyboard layout updated to ABNT2."
+
 }
 main() {
     echo "Updating and upgrading system packages..."
@@ -182,40 +292,15 @@ main() {
     
         case "$option_choice" in
             1)
-                echo "Applying US Layout..."
-                echo -n "Is your keyboard A) 104-keys or B) 105-keys? [A/B]: "
-                read -r type_keyboard
-                
-                # Standardize input to uppercase
-                type_keyboard=${type_keyboard^^}
-    
-                if [[ "$type_keyboard" == "A" ]]; then
-                    sed -i 's/XKBMODEL=".*"/XKBMODEL="pc104"/' /etc/default/keyboard
-                    sed -i 's/XKBVARIANT=".*"/XKBVARIANT=""/' /etc/default/keyboard
-                else
-                    sed -i 's/XKBMODEL=".*"/XKBMODEL="pc105"/' /etc/default/keyboard
-                    sed -i 's/XKBVARIANT=".*"/XKBVARIANT="intl"/' /etc/default/keyboard
-                fi
-    
-                sed -i 's/XKBLAYOUT=".*"/XKBLAYOUT="us"/' /etc/default/keyboard
-                sed -i 's/XKBOPTIONS=".*"/XKBOPTIONS=""/' /etc/default/keyboard
-                sed -i 's/BACKSPACE=".*"/BACKSPACE="guess"/' /etc/default/keyboard
-    
-                setupcon
-                success "Keyboard layout updated to US."
+                setter_key_us_auto                
+
                 install_mysql
                 break
                 ;;
             2)
-                echo "Applying ABNT2 Layout..."
-                sed -i 's/XKBMODEL=".*"/XKBMODEL="abnt2"/' /etc/default/keyboard
-                sed -i 's/XKBLAYOUT=".*"/XKBLAYOUT="br"/' /etc/default/keyboard
-                sed -i 's/XKBVARIANT=".*"/XKBVARIANT="abnt2"/' /etc/default/keyboard
-                sed -i 's/XKBOPTIONS=".*"/XKBOPTIONS="lv3:alt_switch,compose:rctrl"/' /etc/default/keyboard
-                sed -i 's/BACKSPACE=".*"/BACKSPACE="guess"/' /etc/default/keyboard
-    
-                setupcon
-                success "Keyboard layout updated to ABNT2."
+                
+                setter_key_br_auto
+
                 install_mysql
                 break
                 ;;
@@ -229,13 +314,24 @@ main() {
     success "Script execution finished. Thank you!"
     echo "====================================================================="
 }
+root_user_checker() {
+    # Check for root privileges
+    if [[ $EUID -ne 0 ]]; then
+        error "This script must be run as root. Use: sudo $0"
+        exit 1
+    fi
+    success "Root User is activated."
 
-# Check for root privileges
-if [[ $EUID -ne 0 ]]; then
-    error "This script must be run as root. Use: sudo $0"
-    exit 1
-fi
+    main # Call Main's Script Function like as Program
+    
+    # only add programming languages support 
+    # (C,C++ and Python Check, and Java Installation)  
+    # run_lang_to_coding_on_system 
+    
+    # setter_key_br_auto # only keyboard
 
-main # Call Main's Script Function like as Program
+    # setter_key_us_auto # only keyboard
+}
 
+root_user_checker
 
