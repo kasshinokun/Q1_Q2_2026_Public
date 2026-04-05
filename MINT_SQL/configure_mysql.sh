@@ -7,7 +7,7 @@
 # Script Name: configure_mysql.sh
 # Description: Installs and configures MySQL Server and Workbench on Ubuntu/Mint.
 # Author: Gabriel da Silva Cassino
-# Date: 2026-04-03 release 20260403 alpha 1f
+# Date: 2026-04-03 release 20260405 alpha 1b
 # =============================================================================
 
 # Stack-structured script like a normal program.
