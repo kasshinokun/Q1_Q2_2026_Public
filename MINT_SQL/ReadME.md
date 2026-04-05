@@ -14,11 +14,12 @@ Gabriel da Silva Cassino
 ## Date Creation: 
 2026-04-03 
 ## Release Version:
-version 20260403 release alpha 1e 
+version 20260403 release alpha 1f 
 
 - add stack-structured functions like as normal program
 - added setting MySQL Workbench by .deb package
 - Some additional packages and necessaries details to manage on Live OS
+- Add choice option for MySQL Workbench Community by snap or .deb package
 - **Note Important:** using .deb package is more stable to running on Live OS
 
 ### Reason: 
