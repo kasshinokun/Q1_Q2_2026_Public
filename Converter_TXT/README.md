@@ -1,5 +1,7 @@
 # 🔄 Conversor de TXT em PDF
 
+**Versão/Release:** 20260619 Release v1.alpha_20260619
+
 Um conversor de arquivos `.txt` para `.pdf` em Python, com **duas interfaces** disponíveis: uma interface de linha de comando (CLI) e uma interface gráfica (GUI) construída com `customtkinter`.
 
 O programa lista automaticamente todos os arquivos `.txt` encontrados no diretório do projeto, permite selecionar um deles e gera um PDF correspondente, com quebra de linha automática e paginação.
@@ -99,6 +101,15 @@ python ctk_app.py
 - Na interface gráfica, a geração do PDF roda em uma `threading.Thread` separada para manter a UI responsiva, com atualização segura da interface via `self.after(...)`.
 
 ---
+## Erro recorrente no CTK
+
+**Ao fechar o CTK Form**, a aplicação não volta para o *menu de main.py*, apresenta o erro abaixo:
+
+![Tela erro](https://github.com/kasshinokun/Q1_Q2_2026_Public/blob/main/Converter_TXT/erro_recorrente.png)
+
+**Solução temporária:* **fechar o terminal**
+
+**A aplicação em console** está funcionado normalmente, ou seja, ao sair do *console de console_app.py* a aplicação corretamente volta para o *menu de main.py*.
 
 ## 👤 Autor
 
